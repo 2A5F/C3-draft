@@ -93,7 +93,7 @@ print('hello world')
 |-|-|-|-|
 |_Bool|bool|1，1/8|true，false|
 |char|i8|1|0i8|
-|unsigned  char|u8，char|1|c"x", c'x'，0u8|
+|unsigned char|u8，char|1|c"x", c'x'，0u8|
 |short|i16|2|0i16|
 |int|i32，int|4|0，0i32|
 |long|i64|8|0i64|
@@ -468,6 +468,70 @@ void main() {
     some()
     // string <-[`a, `b](`a a, `b b)
     ```
+    
+## 内联函数
+内联函数其实是卫生宏  
+
+- `[]` 表示可选  
+
+-  [内联返回值] `inline`[`(`<其他标注>`)`] [上下文返回值] <函数名>`(`[函数参数]`)` [async标注] <函数体>
+
+内联函数会要求调用者具有与内联函数一样的上下文  
+比如内联函数标注返回 `void` 那么调用者也必须返回 `void`  
+不写的话就代表任何情况都可以，并且没有相关影响的代码    
+作为类型时 `async标注` 也写在 `inline` 的括号内  
+
+```cc
+inline void some() { 
+    return
+}
+
+void foo() {
+    some()
+}
+```
+
+展开成  
+
+```cc
+void foo() {
+    return
+}
+```
+
+使用 `inline return` 返回一个值  
+```cc
+int inline some() { 
+    val x = 1
+    inline return x * 2
+} 
+void foo() {
+  val x = some()
+}
+```
+
+展开成  
+
+```cc
+void foo() {
+  val x_1 = 1
+  val x = x_1 * 2
+}
+```
+
+但并不是所有 `inline` 函数都会被展开  
+比如作为变量传递的 `inline` 
+
+```cc
+Arr[`b] map(`b inline(loopbody) <-(`a) cb, Arr[`a] f) {
+    for(x in f) {
+        cb(x)
+    }
+}
+map({
+    break
+}, [])
+```
 
 ## 异步
 使用 `await` 关键字或  
@@ -484,10 +548,11 @@ Async[int] some() async {
 `!` 实际上是后缀运算符
 
 ```csharp
-inline `T [`T]Async.self! async {
-    return await self
+`T  inline [`T]Async.self! async {
+    inline return await self
 }
 ```
+
 ## 结构
 ```csharp
 struct Vector3 {
@@ -589,6 +654,7 @@ val v = Vector3@{
         ~Self() { }
     }
     ```
+    
 #### 构造数据结构 
 的几种方式  
 
@@ -608,6 +674,7 @@ Vector3 v = @{
 Vector3 v = default
 val v = default Vector3
 ```
+
 ## 子范围限定
 子范围只能选择超集内有的内容  
 但构造函数可以随意增加  
@@ -625,6 +692,7 @@ B b = B(1)
 
 B c = a // error
 ```
+
 ## 枚举
 ```csharp
 enum Maybe[`T] {
@@ -649,6 +717,7 @@ enum Some {
 }
 val x = Some.A@{ a = 1  b = 2 }
 ```
+
 ## 种
 种是一种不能扩展的  
 对结构实现的约束和提供   
@@ -666,6 +735,7 @@ struct Some with SomeKind {
     }
 }
 ```
+
 #### 种默认实现
 种可以有默认实现  
 但如果结构同时实现了多个种具有同个成员  
@@ -680,6 +750,7 @@ kind SomeKind {
 }
 struct Some with SomeKind {}
 ```
+
 ##  泛型
 泛型类型必须在类型前面加上``` ` ```  
 泛型括号 `[]` 在左边是定义，在右边是实例  
@@ -775,6 +846,7 @@ val b = some():[TypeB]
 TypeA a = some()
 TypeB b = some()
 ```
+
 ## 类
 使用`class`定义一个类  
 使用`inspace`定义一个实现空间  
