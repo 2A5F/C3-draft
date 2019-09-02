@@ -153,9 +153,9 @@ while (true) { break }
 do { continue } while (false)
 
 while({ return false }) {}
-while({ val x = false { return x } }) {}
+while({ val x = false }, { return x }) {}
 
-while({ int i = 0 { i < 10 } }) { 
+while({ int i = 0 }, { i < 10 }) { 
     print(i) 
 } finally { i++ }
 
