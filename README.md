@@ -149,9 +149,6 @@ val x = if (true) { 1 }
     
 for (x in some) { }
 
-val iter = for*(x in 0..10) { yield x }
-val iter = for*(x in arr) { yield* x }
-
 while (true) { break }
 do { continue } while (false)
 
@@ -171,6 +168,19 @@ while(false) {
 } finally { inner++ }
 
 while { } // inf loop
+
+val iter = for(x in 0..10) ^ { yield x }
+Arr[Arr] arr
+val iter = for(x in arr) ^ { yield^ x }
+val iter = while(false) ^ { yield 1 }
+
+int^ some() { yield 1 }
+
+^bool some() {
+  if(yield) { } 
+}
+
+for await(x in aiter) { }
 
 val x = case(1) {
     of 0 = '0'
