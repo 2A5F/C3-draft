@@ -170,11 +170,16 @@ while(false) {
 while { } // inf loop
 
 val iter = for(x in 0..10) ^ { yield x }
-Arr[Arr] arr
+Arr[Arr] arr = []
 val iter = for(x in arr) ^ { yield^ x }
 val iter = while(false) ^ { yield 1 }
 
 int^ some() { yield 1 }
+
+val gent = for(x in 0..) int^bool {
+    if(!yield x) break
+}
+for(x in gent, { x < 10 }) { }
 
 ^bool some() {
   if(yield) { } 
