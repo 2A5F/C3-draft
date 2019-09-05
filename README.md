@@ -214,7 +214,14 @@ void some() {
     goto:label
 }
 
-// block
+void some(){
+    val x = 1
+    { // block
+        val x = 2
+    }
+}
+
+// breakable block
 val x = :{
     break 'some val'
 }
@@ -408,26 +415,41 @@ void main() {
     ```
 - #### lambda
     ```csharp
-    val l = x -> { x + 1 }
+    val l = x -> |{ x + 1 }
     l(1)
     
-    val l2 = { it + 1 }
+    val l2 = |{ it + 1 }
     l2(1)
     
-    val l3 = (a, b)-> { a + b }
+    val l3 = (a, b)-> |{ a + b }
     
-    val l4 = { a, b -> a + b }
+    val l4 = |{ a, b -> a + b }
     
-    val a = int <-(int a, int b)-> { a + b } 
+    val a = int <-(int a, int b)-> |{ a + b } 
     
-    val b = { int <- int a, int b -> a + b } 
+    val b = |{ int <- int a, int b -> a + b } 
     
     val c = int add(int a, int b) a + b
     ```
+- #### 指定闭包捕获
+    如果不指定那么默认自动判断捕获  
+
+    ```csharp
+    void some(){
+        val a = 1
+        val b = 1
+        val c = |a, b|{ a + b }
+    }
+    void some() {
+        val a = 1
+        val b = 1
+        val c|a, b|() { a + b }
+    }
+    ```
 - #### 函数类型
     ```csharp
-    int <-(int a, int b) add = { a + b }
-    int <-(int a, int b)! add = { a + b }
+    int <-(int a, int b) add = |{ a + b }
+    int <-(int a, int b)! add = |{ a + b }
     
     void some(int add(a, b)) {
         add(1, 2)
@@ -448,15 +470,15 @@ void main() {
     同时接受多个函数时候需要用 `?->?` 或 `()->?` 指定  
     
     ```csharp
-    some((a, b)-> ?, 1, 2) {
+    some((a, b)-> ?, 1, 2) |{
         a + b
     }
     
-    some(?, 1, 2) { a, b ->
+    some(?, 1, 2) |{ a, b ->
         a + b
     }
     
-    some(?->?, ?, ?, 1, 2) {
+    some(?->?, ?, ?, 1, 2) |{
         a + b
     }
     ```
@@ -633,7 +655,7 @@ val v = Vector3@{
         int a
         float Self() 2.0
     }
-    Some Some() @{ a = 1 } // no self
+    Some Some() = @{ a = 1 } // no self
     Some Some.Self() { a = 1 } // has self
     int Some() 1
     ```
@@ -675,6 +697,19 @@ Vector3 v = default
 val v = default Vector3
 ```
 
+#### lambda形式构造  
+lambda形式时必须明确具有类型名  
+
+```scala
+val v = Vector3@|{
+    x = 1
+    self.y = 2
+    print(self)
+    self.z = 3
+    // do anything
+}
+```
+
 ## 子范围限定
 子范围只能选择超集内有的内容  
 但构造函数可以随意增加  
@@ -695,20 +730,25 @@ B c = a // error
 
 ## 枚举
 ```csharp
-enum Maybe[`T] {
+enum [`T]Maybe {
     Maybe(`T val) Some(val)
     of Some(`T val)
     of None
     Maybe[`R] Some(`R <-(`T v) fn) case (self) {
-        of Some(v) { fn(v) }
+        of Some(v) { Some(fn(v)) }
         of None = None
     }
 }
+Maybe[`R] Maybe[`T].FlatMap(Maybe[`R] <-(`T v) fn) case (self) {
+    of Some(v) { fn(v) }
+    of None = None
+}
+
 Maybe some = Some(1)
 val some = Maybe.Some(1)
 val some = Maybe(1)
 
-some.Some({ None[int] }).Some(v -> { v + 1 })
+Some(some, |{ 1 }).FlatMap(|{ None[int] }).Some(v -> |{ v + 1 })
 
 enum Some {
     of A {
@@ -762,7 +802,7 @@ struct Some with SomeKind {}
 ```
 - #### 自动泛化
     ```csharp
-    val add(a, b){
+    val add(a, b) {
         return a + b
     }
     ```
@@ -859,7 +899,7 @@ TypeB b = some()
 对函数的类  
 
 ```csharp
-class Eq[`A, `B] {
+class [`A, `B]Eq {
     bool Equals(`A a, `B b)
 }
 inpsace Eq[int, int] {
@@ -873,10 +913,10 @@ Equals(1, 2)
 对泛型实现  
 
 ```csharp
-class Eq[`T] {
+class [`T]Eq {
     bool Equals(`T a, `T b)
 }
-inspace Eq[Arr[`A]] where `A( Eq[`A] ) {
+[`A]inspace Eq[Arr[`A]] where `A( Eq[`A] ) {
     bool Equals(Arr[`A] a, Arr[`A] b) {
         if(a.length != b.length) return false
         for(val i in a) {
@@ -898,19 +938,16 @@ inspace Eq[int, int], Eq[float, float] {
     }
 }
 ```
+
 #### 类依赖
 类依赖会要求实现这个类之前必须实现依赖的类  
-但可以在实现的时候写在一起    
 
 ```csharp
-class Some[`T]( Eq[`T] ) { 
+class [`T]Some( Eq[`T] ) { 
     void some(`T t){}
 }
-inspace Some[`T] {
-    void some(`T t) { }
-    bool Equals(`T a, `T b) { return false }
-}
 ```
+
 #### 实现与现存定义重复
 同时存在类内实现和独立定义  
 并且签名完全重复时  
@@ -920,7 +957,7 @@ inspace Some[`T] {
 或者使用`using`块   
 
 ```csharp
-class Some[`T] {
+class [`T]Some {
     void some(`T v)
 }
 inspace Some[int] {
@@ -939,7 +976,7 @@ void foo() using Some[int] {    // 函数级 using 块
     some(1)
 }
 ```
-#### 多个概念共用一个实现
+#### 多个类共用一个实现
 ```csharp
 class A[`T] {
     void some(`T v)
@@ -1091,6 +1128,7 @@ type x(num)(float - int)
 }
 add[int](1, 2)
 add[float](1.5, 3.14)
+add[1](1, 1)
 ```
 #### 字面量类型运算
 对于数字字面量类型可以进行范围运算  
@@ -1120,7 +1158,6 @@ type x(0f64)
 ```
 
 未完待续
-
 
 
 
@@ -1183,7 +1220,7 @@ a[5] // runtime error
 val a == Array[:len = 3]@{ 1, 'b', false }
 ```
 #### functor
-```ccc
+```cc
 class [`f]Functor {
     `f[`b] fmap(`f[`a], `b <-(`a))
 }
