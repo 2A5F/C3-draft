@@ -570,7 +570,7 @@ Async[int] some() async {
 `!` 实际上是后缀运算符
 
 ```csharp
-`T  inline [`T]Async.self! async {
+`T  inline operator [`T]Async.self! async {
     inline return await self
 }
 ```
@@ -1116,11 +1116,11 @@ type A(B)
 ```typescript
 type x(num)(float - int)
 ```
-# 依赖类型
-在泛型标注内的泛型名后带上括号来要求泛型依赖  
-依赖可以是值也可以是其他类型  
-依赖表示这个泛型必须是括号内类型运算结果的子类型  
-*也可以用 ``` `() ``` 来表示一个匿名依赖*  
+# 前置类型
+在泛型标注内的泛型名后带上括号来要求泛型前置依赖  
+前置依赖可以是值也可以是其他类型  
+前置依赖表示这个泛型必须是括号内类型运算结果的子类型  
+*也可以用 ``` `() ``` 来表示一个匿名前置依赖*  
 
 ```csharp
 `n [`n(num)]add(`n a, `n b) {
@@ -1156,6 +1156,40 @@ type x(0f)
 type x(0f32)
 type x(0f64)
 ```
+
+# 运算符重载
+
+- 中缀运算符
+
+  ```csharp
+  string operator (string a) + (string b) { }
+  string operator string.self + (string b) { }
+  string operator (string a) + string.self { }
+
+  val x = 'a' + 'b'
+  ```
+
+- 前缀运算符  
+
+  ```csharp
+  int operator -(int some) { 0 - some }
+
+  val x = -1
+  ```
+
+- 后缀运算符  
+  重载时，后缀运算符的参数不能和中缀运算符的第一个参数重复  
+
+  ```csharp
+  Type inline operator (Type a)! { 
+    inline return Mutable[a] 
+  }
+  Type inline operator (Type a)? { 
+    inline return Nullable[a] 
+  }
+  ```
+
+---
 
 未完待续
 
