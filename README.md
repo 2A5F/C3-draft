@@ -70,10 +70,12 @@ print('hello world');
     const a = 1;
     ```
 - #### 注释
-    ```cc
+    ```swift
     // 单行
     /* 多
     行*/
+    /* /* 嵌套 */ */
+    /** 文档 */
     ```
 - #### 数字中间符
     ```ccc
@@ -85,9 +87,9 @@ print('hello world');
     '${some}'
     ```
 - #### 所有字符串都是多行的  
-    ```scala
-    'asd
-    123'
+    ```c
+    "asd
+    123"
     ```
 
 ## 基础类型  
@@ -125,6 +127,8 @@ print('hello world');
 |c/c艹语言名|类型名|字面量|
 |-|-|-|
 |char*/string|string|'x', "x"|
+|~~N/A~~|Mutable[type]|type!|
+|~~N/A~~|Nullable[type]|type?|
 
 ### 指针和可空类型
 |名称|c语言内|ccc内|
@@ -150,6 +154,12 @@ val x = if (true) { 1 }
     else { 3 };
     
 for (x in some) { }
+for (x, i in some) { } // i >= 0
+
+val count = for(x, i in some) { } else { 
+    /* 当所有项目遍历结束后调用, 可以返回值 */ 
+    return i
+};
 
 while (true) { break }
 do { continue } while (false)
@@ -162,24 +172,24 @@ while({ int i = 0; }, { i < 10 }) {
 } finally { i++ }
 
 while({ false }) {
-    int inner = 0
+    int inner = 0;
 } finally { inner++ }
 
 while(false) {
-    int inner = 0
+    int inner = 0;
 } finally { inner++ }
 
 while { } // inf loop
 
-val iter = for(x in 0..10) ^ { yield x }
+val iter = for(x in 0..10) ^ { yield x };
 Arr[Arr] arr = []
-val iter = for(x in arr) ^ { yield^ x }
-val iter = while(false) ^ { yield 1 }
+val iter = for(x in arr) ^ { yield^ x };
+val iter = while(false) ^ { yield 1 };
 
 int^ some() { yield 1 }
 
 val gent = for(x in 0..) int^bool {
-    if(!yield x) break
+    if(!yield x) break;
 }
 for(x in gent, { x < 10 }) { }
 
@@ -190,7 +200,7 @@ for(x in gent, { x < 10 }) { }
 for await(x in aiter) { }
 
 val x = case(1) {
-    of 0 = '0'
+    of 0 = '0';
     of 1 = { true }
     else { print('no') }
 }
@@ -220,6 +230,10 @@ void some(){
     val x = 1;
     { // block
         val x = 2;
+    }
+    val x = {
+        val x = 2 + 1;
+        x
     }
 }
 
@@ -261,7 +275,7 @@ c3 里异常也是一种控制流
 ```js
    |void a() {
 5  |
-6  |    throw '123'
+6  |    throw '123';
 8  |
    |}
    |void b() {
@@ -270,7 +284,7 @@ c3 里异常也是一种控制流
 7  |
    |    }           
 3  |
-4  |    a()
+4  |    a();
 9  |
 10 |    catch (any msg) {
    |        // 不会执行
@@ -283,7 +297,7 @@ c3 里异常也是一种控制流
 ```js
    |void a() {
 7  |
-8  |    throw '123'
+8  |    throw '123';
 10 |
    |}
    |void b() {
@@ -296,10 +310,10 @@ c3 里异常也是一种控制流
 9  |    
    |    }
 5  |
-6  |   a()
+6  |   a();
 11 |
    |}
-0  |b()
+0  |b();
 ```
 ### 抛出标注
 默认会自动隐式标注抛出  
@@ -307,8 +321,8 @@ c3 里异常也是一种控制流
 
 ```java
 void some() throws string, int {
-    throw '123'
-    throw 123
+    throw '123';
+    throw 123;
 }
 ```
 ### 抛出中断 
@@ -318,9 +332,9 @@ void some() throws string, int {
 
 ```java
 void some() throws string, break int, int {
-    throw '123'
-    return throw 123
-    throw 123   // 不会执行
+    throw '123';
+    return throw 123;
+    throw 123;   // 不会执行
 }
 ```
 `try` 关键字可以在调用可能会抛出的函数时使用  
@@ -331,7 +345,7 @@ void some() throws string, break int, int {
 
 ```java
 void some() {
-    try a()
+    try a();
     // 不会执行
 }
 ```
@@ -341,7 +355,7 @@ void some() {
 ```java
 void some() {
     try {
-        a()
+        a();
         // 不会执行
     }
     // 会执行
@@ -352,11 +366,11 @@ void some() {
 ```java
 void some() {
     val r = try {
-        a()
+        a();
     } with catch (string msg) { msg }
     
     val r = try {
-        a()
+        a();
     } with catch {
         of (string msg) { msg }
     }
@@ -410,10 +424,6 @@ void main() {
     ```csharp
     int add(a, b) a + b;
     int add(a, b) = a + b;
-    ```
-- #### 内链函数
-    ```cc
-    inline bool eq(a, b) a == b;
     ```
 - #### lambda
     ```csharp
@@ -752,6 +762,8 @@ val some = Maybe(1);
 
 Some(some, |{ 1 }).FlatMap(|{ None[int] }).Some(v -> |{ v + 1 });
 
+//////////////////////////////
+
 enum Some {
     of A {
         int a, b;
@@ -772,7 +784,7 @@ kind SomeKind {
 }
 struct Some with SomeKind {
     int v;
-    int add(Some { v }, int o) {
+    int add(int o) {
         v + o;
     }
 }
@@ -1003,8 +1015,8 @@ inspace A[int], B[int] {
 |2|其他 或 `auto` 标注|堆|
 *具有无法确定大小那一条的类型不能标注 `stackalloc`*
 ```csharp
-new val x = 1 // 堆
-stackalloc val v = 'a' //栈
+new val x = 1; // 堆
+stackalloc val v = 'a'; //栈
 ```
 # 模块
 没有命名空间，只有模块  
@@ -1013,7 +1025,7 @@ stackalloc val v = 'a' //栈
 *同一个父级模块内不能有除了函数外的模块成员名和模块名重名*  
 *也就是说函数可以和模块合并*
 ```c++
-module path.to.Name // 文件头
+module path.to.Name; // 文件头
 
 export int a = 1; // 
 
@@ -1024,11 +1036,11 @@ module path.to.Name { // 局部模块
 }
 ```
 ```c++
-using path.to.Name.a, path.to.Name.b // 全文件引用
+using path.to.Name.a, path.to.Name.b; // 全文件引用
 
-using path.to.Name import a, b // 导入部分内容
+using path.to.Name import a, b; // 导入部分内容
 
-using path.to.Name as NewName import a as b, c // 创建别名
+using path.to.Name as NewName import a as b, c; // 创建别名
 
 using path.to.Name { // 局部引用
     using path.to.Name import a, b  { 
@@ -1102,7 +1114,7 @@ type A(B);
 - dif
   
     ```typescript
-    type s(a ^ b); // 对称差集，要求a和b之间不重叠的部分
+    type s(a !& b); // 对称差集，要求a和b之间不重叠的部分
     ```
     ![dif](https://upload.wikimedia.org/wikipedia/commons/4/46/Venn0110.svg)
 - not
@@ -1158,8 +1170,19 @@ type x(0f);
 type x(0f32);
 type x(0f64);
 ```
+# 运算符
+c3里的普通运算符之间没有优先级，不管加减乘除  
+都从左到右计算  
 
-# 运算符重载
+普通运算符不能连用，必须明确可区分  
+
+前缀运算符优先级最低  
+后缀最高  
+中缀中等  
+
+优先级越高越优先  
+
+## 运算符重载
 
 - 中缀运算符
 
@@ -1191,7 +1214,102 @@ type x(0f64);
   }
   ```
 
+## 第一类运算
+第一类运算必然是前缀的  
+从左向右的  
+
+第一类运算很像调用运算符重载  
+但是第一类运算必须有且只有一个参数  
+
+```csharp
+val a = (1 +);
+val b = a b;
+
+struct Some {
+    int operator self(int other) {
+        return other + 1
+    }
+}
+
+val x = Some();
+val y = x 1;
+// 2
+
+int operator string.self(int other) { '${self}${other}' }
+val a = 'a' 1;
+// 'a1'
+```
+
+## 调用运算符重载
+
+```csharp
+struct Some {
+    int self(int other) {
+        return other + 1
+    }
+}
+val some = Some();
+some(1);
+// 2
+
+int string.self(int other) { '${self}${other}' }
+val a = 'a'(1);
+// 'a1'
+```
+
+## 内置普通运算符列表
+
+|运算符|用途|类型|
+|-|-|-|
+|- a|让值变成负数|数字|
+|a + b      | 加运算    |数字|
+|a - b      | 减运算    |数字|
+|a * b      | 乘运算    |数字|
+|a / b      | 除运算    |数字|
+|a % b      | 模运算    |数字|
+|a ** b     | 幂运算    |数字|
+|! b        | 逻辑否    |是否|
+|a && b     | 逻辑与    |是否|
+|a \|\| b   | 逻辑或    |是否|
+|a == b     | 相等      |相等类|
+|a != b     | 不等      |相等类|
+|a > b      | 大于      |比较类|
+|a < b      | 小于      |比较类|
+|a >= b     | 大于等于  |比较类|
+|a <= b     | 小于等于  |比较类|
+|a !<       | 不小于    |比较类|
+|a !>       | 不大于    |比较类|
+|a !        | 可变化    |类型|
+|a ?        | 可空化    |类型|
+|a ^ b      | 生成器    |类型|
+|a ^        | 生成器    |类型|
+|^ a        | 生成器    |类型|
+|a ++       | 尾自增    |数字|
+|++ a       | 首自增    |数字|
+|a --       | 尾自减    |数字|
+|-- a       | 首自减    |数字|
+|a .. b     | 范围      |范围类|
+|a ..       | 范围      |范围类|
+|.. b       | 范围      |范围类|
+|a & b      | 与类型    |类型|
+|a + b      | 和类型    |类型|
+|a - b      | 差类型    |类型|
+|a !& b     | 对称差类型 |类型|
+|! a        | 非类型    |类型|
+|? a        | 空检测    |可空|
+|a ?. b     | 空检测链  |可空|
+|a ?? b     | 如果空    |可空|
+|a !        | 异步等待  |异步|
 ---
+
+## 特殊运算符
+|运算符|用途|类型|是否可重载|是否能组合|其他|
+|-|-|-|-|-|-|
+|=|赋值|可变，语法特性|是|否|
+|x=|x为任何中缀运算符|否|否|
+|()|调用，类型约束，语法特性|任何|是，仅调用|否|优先级最高|
+|?()|空检测调用|可空可调用|否|否|
+|a \| b|或类型|类型|否|是|
 
 未完待续
 
