@@ -772,10 +772,10 @@ enum Some {
 val x = Some.A@{ a = 1; b = 2 };
 ```
 
-## 种
-种是一种不能扩展的  
+## 性质
+性质是一性质不能扩展的  
 对结构实现的约束和提供   
-对种的实现必须在结构上声明  
+对性质的实现必须在结构上声明  
 并且必须在同一个程序集内  
 
 ```csharp
@@ -790,9 +790,9 @@ struct Some with SomeKind {
 }
 ```
 
-#### 种默认实现
-种可以有默认实现  
-但如果结构同时实现了多个种具有同个成员  
+#### 性质默认实现
+性质可以有默认实现  
+但如果结构同时实现了多个性质具有同个成员  
 那么忽略默认实现并要求结构必须实现  
 
 ```csharp
@@ -905,10 +905,10 @@ TypeB b = some();
 使用`class`定义一个类  
 使用`inspace`定义一个实现空间  
 
-类和种的区别是  
-种是对结构的实现约束和提供  
+类和性质的区别是  
+性质是对结构的实现约束和提供  
 而类是存在量化  
-种不可扩展，类可扩展  
+性质不可扩展，类可扩展  
 
 对函数的类  
 
@@ -989,6 +989,10 @@ using Some[int], Other[xxx] {   // 使用 using 块
 void foo() using Some[int] {    // 函数级 using 块
     some(1);
 }
+
+void [Some[`T]]bar(`T v) {      // 泛型模式匹配
+    some(v);
+}
 ```
 #### 多个类共用一个实现
 ```csharp
@@ -1011,7 +1015,7 @@ inspace A[int], B[int] {
 |1, 3|无法确定大小，装箱，多态，指针，引用， 闭包|堆|
 |2, 3|`stackalloc` 标注|栈|
 ||大小过大的|堆|
-||具有复制传递种|栈|
+||具有复制传递性质|栈|
 |2|其他 或 `auto` 标注|堆|
 *具有无法确定大小那一条的类型不能标注 `stackalloc`*
 ```csharp
@@ -1022,8 +1026,13 @@ stackalloc val v = 'a'; //栈
 没有命名空间，只有模块  
 不在文件头写的话，整个文件都是独立的模块  
 而不会并入全局模块  
+
 *同一个父级模块内不能有除了函数外的模块成员名和模块名重名*  
 *也就是说函数可以和模块合并*
+
+普通模块只能包含定义  
+单文件模块可以包含任意代码  
+
 ```c++
 module path.to.Name; // 文件头
 
@@ -1081,6 +1090,28 @@ export path.to.Name import a, b; // 重新导出部分
 export path.to.Name import a as c, b; // 重新导出部分并重命名
 export using path.to.Name; // 引入的同时重新导出
 ```
+
+## 单文件模块和构造模块  
+```c++
+// a.c3
+module()
+print('loaded')
+
+// b.c3
+using './a.c3'
+
+// c.c3
+using './a.c3'
+using './b.c3'
+
+// > loaded
+```
+```c++
+module x() {
+    module a.b.c() {}
+}
+```
+
 # 类型别名
 在`()`括号内描述需要建立别名的类型或者类型运算  
 
@@ -1239,10 +1270,16 @@ struct Some {
     int self(int other) {
         return other + 1
     }
+    void self(int index) operator =(int value) {
+        print(index, value)
+    }
 }
 val some = Some();
 some(1);
 // 2
+
+some(1) = 2
+// 1 2
 
 int string.self(int other) { '${self}${other}' }
 val a = 'a'(1);
