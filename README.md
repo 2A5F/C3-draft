@@ -2,8 +2,6 @@
 
 ccc，简写c3
 
-[有道云](http://note.youdao.com/noteshare?id=8f503f3830ded4be4bdf7ef25f40fbc9)  
-
 为了记录版本变更，已放在 [https://github.com/2A5F/C3-draft/](https://github.com/2A5F/C3-draft/)  
 
 编译器 [https://github.com/2A5F/Chaoite](https://github.com/2A5F/Chaoite)  
