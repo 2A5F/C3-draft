@@ -28,9 +28,13 @@ print('hello world');
 
 - #### 变量定义
     ```cc
-    int?! a;
-    int a = 1;
+    mut [int?]a;
+    val [int]a = 1;
+    mut a int;
     ```
+
+    变量定义时类型写在名字后面而不是括号里的话是不能赋值的  
+
     - ##### 变量定义自动推断类型
          ```csharp
          val a = 1;
@@ -40,27 +44,26 @@ print('hello world');
         不可变变量必须马上赋值  
         
         ```csharp
-        int a = 1;
+        val [int]a = 1;
         val a = 1;
         ```
         - ###### 使用`lazy`块延迟初始化不可变变量  
-            ```csharp
-            int a = lazy {
+            ```cc
+            val [int]a = lazy {
                 2 ^ 6
             };
             ```
     - ##### 可变变量
-        可变变量需要在类型名后面加上 `!`  
-        
-        ```csharp
-        int! a = 1;
-        val! a = 1;
+        ```cc
+        mut [int]a = 1;
+        mut a = 1;
         ```
 - #### 变量修改语句
-    ```cc
-    a = 2;
+    `let` 是语句，没有返回值  
+    ```swift
+    let a = 2;
     a++;
-    a += 1;
+    let a + 1; // 其他语言是 a += 1
     ```
 - #### 常量
     常量是编译时决定的  
@@ -78,7 +81,7 @@ print('hello world');
     /** 文档 */
     ```
 - #### 数字中间符
-    ```ccc
+    ```kotlin
     1_000_000
     ```
 - #### 字符串模板
@@ -118,8 +121,6 @@ print('hello world');
 |void|void|void|
 |nullptr|null|null|
 |~~N/A~~|num|0n, 0.0n|
-|~~N/A~~|int|0|
-|~~N/A~~|float|0.0, 0f|
 
 ### 高级类型
 高级类型大小是变长的  
@@ -127,26 +128,430 @@ print('hello world');
 |c/c艹语言名|类型名|字面量|
 |-|-|-|
 |char*/string|string|'x', "x"|
-|~~N/A~~|Mutable[type]|type!|
+|~~N/A~~|Mutable[type]|mut type|
 |~~N/A~~|Nullable[type]|type?|
 
-### 指针和可空类型
+### 指针和引用
 |名称|c语言内|ccc内|
 |-|-|-|
-|指针|type \*name| type!*! name|
-|常量的指针|const type \*name| type*! name|
-|指针的常量|type \* const name| type!* name|
+|指针|type \*name| mut (mut type)* name|
+|常量的指针|const type \*name| mut type* name|
+|指针的常量|type \* const name| (mut type)* name|
 |常量的指针的常量|const type \* const name| type* name|
-|可空|~~N/A~~|~~N/A~~|
-|常量的可空|~~N/A~~|~~N/A~~|
-|可空的常量|~~N/A~~|type?! name|
-|常量的可空的常量|~~N/A~~| type? name|
-**指针是不安全的，必须在`unsafe`块内使用**  
-指针和可空类型的区别在于  
-指针可以运算来改变地址  
-而可空类型不能  
-并且可空类型受rc托管而指针不受  
+|引用|type &name| mut type& name|
+|常量的引用|const type &name| type& name|
 
+**指针是不安全的，必须在`unsafe`块内使用**  
+指针和引用的区别在于  
+指针可以运算来改变地址  
+而引用不能  
+
+### 可空类型
+
+可空的 空为 `null`  
+而指针的空位 `nullptr`  
+
+`type?`  
+`mut type?`  
+`type?*`  
+`type?&`  
+
+## 函数
+```csharp
+fun add(a int, b int) [int] {
+    return a + b;
+}
+fun main() {
+    print(add 1 2);
+}
+```
+- #### 函数最后省略return
+    ```cc
+    fun add(a int, b int) [int] {
+        a + b
+    }
+    ```
+- #### 类型自动推断
+    ```csharp
+    fun add(val a, mut b) [int] {
+        a + b
+    }
+    fun add(a, b) [int] {
+        a + b
+    }
+    ```
+    - ##### 返回值自动推导
+        并且返回值不能是可变的  
+        
+        ```csharp
+        fun mul(a int, b) [auto] {
+            a * b
+        }
+        ```
+- #### 函数参数重载
+    ```cc
+    fun add(a int, b int) [int] {
+        a + b
+    }
+    fun add(a int, b int, c int) [int] {
+        a + b + c
+    }
+    fun add(a float, b float) [float] {
+        a + b
+    }
+    ```
+- #### 表达式函数简写
+    ```csharp
+    fun add(a, b) [int] a + b;
+    fun add(a, b) [int] -> a + b;
+    ```
+- #### lambda
+    ```csharp
+    val l = x -> { x + 1 };
+    l 1;
+    
+    val l2 = { it + 1 };
+    l2 1;
+    
+    val l3 = (a, b)-> { a + b };
+    
+    val l4 = { a, b -> a + b };
+    
+    val a = (a int, b int) [int] -> { a + b }; 
+    
+    val b = { (a int, b int) [int] -> a + b }; 
+    
+    val c = fun add(int a, int b) [int] a + b;
+    ```
+- #### 指定闭包捕获
+    如果不指定那么默认自动判断捕获  
+
+    ```csharp
+    fun some() {
+        val a = 1;
+        val b = 1;
+        val c = |a, b|{ a + b };
+    }
+    fun some() {
+        val a = 1;
+        val b = 1;
+        fun c|a, b|() { a + b };
+    }
+    ```
+- #### 函数类型
+    ```csharp
+    (a int, b int)[int] add = { a + b };
+    mut (a int, b int) add = { a + b };
+    
+    fun some(add (a, b)[int]) {
+        add(1, 2);
+    }
+    ```
+- #### 部分调用
+    ```csharp
+    val add0 = add(1, ?);
+    val add1 = add 1;
+    val add2 = add(?, 2);
+    val add3 = add ? 2;
+    val more = some(1, 2, ?..3, 6);
+    val type = some(1, ?int);
+    ```
+    - ##### 尾部函数部分调用   
+    同个调用只能存在一个尾部函数调用  
+    同时接受多个函数时候需要用 `?->?` 或 `()->?` 指定  
+    
+    ```csharp
+    some((a, b)-> ?, 1, 2) {
+        a + b
+    };
+    
+    some(?, 1, 2) { a, b ->
+        a + b
+    };
+    
+    some(?->?, ?, ?, 1, 2) {
+        a + b
+    };
+    ```
+    - ##### 模板字符串的部分调用 
+    ```cc
+    fun some() {
+        return '$? - ${?} - ${1}';
+    }
+    some();
+    // [`a, `b](`a a, `b b)[string]
+    ```
+    
+## 内联函数
+内联函数其实是卫生宏  
+
+- `[]` 表示可选  
+
+-  =`inline`[`(`<其他标注>`)`][`[`<内联返回类型>`]`] <函数定义> [async标注] <函数体>
+
+内联函数会要求调用者具有与内联函数一样的上下文  
+比如内联函数标注返回 `void` 那么调用者也必须返回 `void`  
+不写的话就代表任何情况都可以，并且没有相关影响的代码    
+作为类型时 `async标注` 也写在 `inline` 的括号内  
+
+```cc
+inline fun some() { 
+    return
+}
+
+fun foo() {
+    some();
+}
+```
+
+展开成  
+
+```cc
+fun foo() {
+    return
+}
+```
+
+使用 `inline return` 返回一个值  
+```cc
+inline[int] fun some() { 
+    val x = 1;
+    inline return x * 2;
+} 
+fun foo() {
+  val x = some();
+}
+```
+
+展开成  
+
+```cc
+fun foo() {
+  val x_1 = 1;
+  val x = x_1 * 2;
+}
+```
+
+但并不是所有 `inline` 函数都会被展开  
+比如作为变量传递的 `inline` 
+
+```cc
+fun map(cb (`a)[`b] inline(loopbody), f Arr[`a]) [Arr[`b]] {
+    for(x in f) {
+        cb x;
+    }
+}
+map({
+    break
+}, [])
+```
+
+## 异步
+使用 `await` 关键字或  
+在一个异步值后面加上 `!` 来 `await`  
+
+```csharp
+fun some() [Async[int]] async {
+    await some();
+    some()!;
+    return 1;
+}
+```
+
+`!` 实际上是后缀运算符
+
+```csharp
+inline fun operator [`T]Async.self!() [`T] async {
+    inline return await self;
+}
+```
+
+## 结构
+```csharp
+struct Vector3 {
+    x int;
+    y int;
+    z int;
+}
+val v = Vector3@{
+    x = 1;
+    y = 2;
+    z = 3;
+}
+```
+- #### 构造函数 
+    构造函数使用首字母大写的 `Self` 标注  
+    
+    ```cc
+    struct Vector3 {
+        x int, y int, z int;
+        Self(x, y, z) {
+            self.x = x;
+            self.y = y;
+            self.z = z;
+        }
+    }
+    val v = Vector3(1, 2, 3);
+    ```
+    - ##### 构造函数语法糖
+    ```csharp
+    struct Vector3(x, y, z) {
+        [int]x = x;
+        [int]y = y;
+        [int]z = z;
+    }
+    ```
+    - ##### 构造函数内成员定义
+    ```csharp
+    struct Vector3(self x iny, self y iny, self z iny) {}
+    struct Vector3 <-(x int, y int, z int) {}
+    struct Vector3 {
+        Self(self x iny, self y iny, self z iny);
+    }
+    struct Vector3 {
+        Self <-(x int, y int, z int);
+    }
+    ```
+- #### 成员函数
+    在结构内定义的成员和在外面定义的成员是等价的  
+    `.` 在函数调用上实际是管道运算符  
+    区别在于结构内定义可以省略一个自身参数  
+    并且 c3 使用 `self` 引用 和 `Self` 类型 而不使用 `this`  
+
+    成员函数的`fun`是可选的  
+
+    ```cc
+    struct Some {
+        a int;
+        add(int v) [int] {
+            a + v
+        }
+    }
+    fun add(Some { a }, int v) [int] { // no self
+        a + v
+    }
+    fun Some.add(int v) [int] { // has self
+        a + v
+    }
+    
+    val s = Some@{ a = 1 };
+    s.add(2);
+    // 3
+    ```
+    - ##### 构造函数一样可以在外部  
+    并且构造函数也可以返回其他值  
+    结构内返回其他类型的构造函数不能进行构造  
+    也没有 `self` 引用  
+    
+    ```csharp
+    struct Some {
+        a int;
+        fun Self() [float] 2.0;
+    }
+    fun Some() [Some] = @{ a = 1 }; // no self
+    fun Some.Self() [Some] { a = 1 }; // has self
+    fun Some() [int] 1;
+    ```
+- #### 分部定义
+    对于结构的分部定义，只能在同个包并且同个模块内  
+
+    ```csharp
+    struct Some {
+        a int;
+    }
+    struct Some {
+        b int;
+    }
+    ```
+- #### 析构函数
+    ```cc
+    struct Some {
+        ~Self() { }
+    }
+    ```
+    
+#### 构造数据结构 
+的几种方式  
+
+```csharp
+val v = Vector3@{
+    x = 1;
+    y = 2;
+    z = 3;
+}
+val v = Vector3(1, 2, 3);
+Vector3 v = @{
+    x = 1;
+    y = 2;
+    z = 3;
+}
+
+Vector3 v = default;
+val v = default Vector3;
+```
+
+#### lambda形式构造  
+lambda形式时必须明确具有类型名  
+
+```scala
+val v = Vector3@|{
+    x = 1;
+    self.y = 2;
+    print(self);
+    self.z = 3;
+    // do anything
+}
+```
+
+## 子范围限定
+子范围只能选择超集内有的内容  
+但构造函数可以随意增加  
+
+```csharp
+struct Superset(a int, b int) {
+    [int]a = a;
+    [int]b = b;
+}
+struct A from Superset { a }
+struct B(b int) from Superset(0, b) { b }
+
+A a = Superset@{ a = 1; b = 2; };
+B b = B(1);
+
+B c = a; // error
+```
+
+## 枚举
+```csharp
+enum [`T]Maybe {
+    Self(val `T) Some(val);
+    of Some(val `T);
+    of None;
+    Some(fn (v `T)[`R]) case (self) [Maybe[`R]] {
+        of Some(v) { Some(fn(v)) }
+        of None = None;
+    };
+}
+fun Maybe[`T].FlatMap(fn (`T v)[Maybe[`R]]) [Maybe[`R]] case (self) {
+    of Some(v) { fn(v) }
+    of None = None;
+};
+
+Maybe some = Some(1);
+val some = Maybe.Some(1);
+val some = Maybe(1);
+
+Some(some, { 1 }).FlatMap({ None[int] }).Some(v -> { v + 1 });
+
+//////////////////////////////
+
+enum Some {
+    of A {
+        a int, b int;
+    }
+}
+val x = Some.A@{ a = 1; b = 2 };
+```
 ## 控制流
 ```csharp
 val x = if (true) { 1 } 
@@ -200,16 +605,16 @@ for(x in gent, { x < 10 }) { }
 for await(x in aiter) { }
 
 val x = case(1) {
-    of 0 = '0';
-    of 1 = { true }
+    of 0 -> '0';
+    of 1 -> { true }
     else { print('no') }
 }
 
 case(1)
-of Int i = true;
-of Float f = false;
+of [int]i -> true;
+of [float]f -> false;
 
-void some() {
+fun some() {
     return
 }
 
@@ -220,29 +625,24 @@ label:for(x in 0..10) {
     }
 }
 
-void some() {
+fun some() {
     label:
     print('loop');
     goto:label;
 }
 
-void some(){
+fun some(){
     val x = 1;
-    { // block
+    :{ // block
         val x = 2;
-    }
-    val x = {
-        val x = 2 + 1;
-        x
     }
 }
 
-// breakable block
 val x = :{
     break 'some val';
 }
 
-void some(){
+fun some(){
     val x = label:{
         :{
             break:label 'some val';
@@ -273,12 +673,12 @@ c3 里异常也是一种控制流
 
 #### 异常的执行顺序
 ```js
-   |void a() {
+   |fun a() {
 5  |
 6  |    throw '123';
 8  |
    |}
-   |void b() {
+   |fun b() {
 1  |
 2  |    catch (any msg) {   
 7  |
@@ -295,12 +695,12 @@ c3 里异常也是一种控制流
 ```
 
 ```js
-   |void a() {
+   |fun a() {
 7  |
 8  |    throw '123';
 10 |
    |}
-   |void b() {
+   |fun b() {
 1  |
 2  |    catch (any msg) {   
    |
@@ -320,7 +720,7 @@ c3 里异常也是一种控制流
 但如果想显式标注
 
 ```java
-void some() throws string, int {
+fun some() throws(string, int) {
     throw '123';
     throw 123;
 }
@@ -328,10 +728,10 @@ void some() throws string, int {
 ### 抛出中断 
 默认的抛出不会阻止下面的代码运行  
 想要阻止需要使用 `return throw`  
-并且标注 `throws break <Type>` 或者自动推导  
+并且标注 `throws(break <Type>)` 或者自动推导  
 
 ```java
-void some() throws string, break int, int {
+fun some() throws(string, break int, int) {
     throw '123';
     return throw 123;
     throw 123;   // 不会执行
@@ -344,7 +744,7 @@ void some() throws string, break int, int {
 `try` 会将所有抛出类型都转成 `break` 标注的   
 
 ```java
-void some() {
+fun some() {
     try a();
     // 不会执行
 }
@@ -353,7 +753,7 @@ void some() {
 `try` 块如果有返回值那么返回值将被转换成 `maybe` / `option` / `nullable` 类型 (名字待定)  
 
 ```java
-void some() {
+fun some() {
     try {
         a();
         // 不会执行
@@ -376,401 +776,6 @@ void some() {
     }
 }
 ```
-## 函数
-```csharp
-int add(int a, int b) {
-    return a + b;
-}
-void main() {
-    print(add(1, 2));
-}
-```
-- #### 函数最后省略return
-    ```csharp
-    int add(int a, int b) {
-        a + b
-    }
-    ```
-- #### 类型自动推断
-    ```csharp
-    int add(val a, val b) {
-        a + b
-    }
-    int add(a, b) {
-        a + b
-    }
-    ```
-    - ##### 返回值自动推导
-        并且返回值不能是可变的  
-        
-        ```csharp
-        val mul(int a, b) {
-            a * b
-        }
-        ```
-- #### 函数参数重载
-    ```cc
-    int add(int a, int b) {
-        a + b
-    }
-    int add(int a, int b, int c) {
-        a + b + c
-    }
-    float add(float a, float b) {
-        a + b
-    }
-    ```
-- #### 表达式函数简写
-    ```csharp
-    int add(a, b) a + b;
-    int add(a, b) = a + b;
-    ```
-- #### lambda
-    ```csharp
-    val l = x -> |{ x + 1 };
-    l(1);
-    
-    val l2 = |{ it + 1 };
-    l2(1);
-    
-    val l3 = (a, b)-> |{ a + b };
-    
-    val l4 = |{ a, b -> a + b };
-    
-    val a = int <-(int a, int b)-> |{ a + b }; 
-    
-    val b = |{ int <- int a, int b -> a + b }; 
-    
-    val c = int add(int a, int b) a + b;
-    ```
-- #### 指定闭包捕获
-    如果不指定那么默认自动判断捕获  
-
-    ```csharp
-    void some(){
-        val a = 1;
-        val b = 1;
-        val c = |a, b|{ a + b };
-    }
-    void some() {
-        val a = 1;
-        val b = 1;
-        val c|a, b|() { a + b };
-    }
-    ```
-- #### 函数类型
-    ```csharp
-    int <-(int a, int b) add = |{ a + b };
-    int <-(int a, int b)! add = |{ a + b };
-    
-    void some(int add(a, b)) {
-        add(1, 2);
-    }
-    void some(int <-(a, b) add) {
-        add(1, 2);
-    }
-    ```
-- #### 部分调用
-    ```csharp
-    val add1 = add(1, ?);
-    val add2 = add(?, 2);
-    val more = some(1, 2, ?..3, 6);
-    val type = some(1, ?int);
-    ```
-    - ##### 尾部函数部分调用   
-    同个调用只能存在一个尾部函数调用  
-    同时接受多个函数时候需要用 `?->?` 或 `()->?` 指定  
-    
-    ```csharp
-    some((a, b)-> ?, 1, 2) |{
-        a + b
-    };
-    
-    some(?, 1, 2) |{ a, b ->
-        a + b
-    };
-    
-    some(?->?, ?, ?, 1, 2) |{
-        a + b
-    };
-    ```
-    - ##### 模板字符串的部分调用 
-    ```cc
-    val some() {
-        return '$? - ${?} - ${1}';
-    }
-    some();
-    // string <-[`a, `b](`a a, `b b)
-    ```
-    
-## 内联函数
-内联函数其实是卫生宏  
-
-- `[]` 表示可选  
-
--  [内联返回值] `inline`[`(`<其他标注>`)`] [上下文返回值] <函数名>`(`[函数参数]`)` [async标注] <函数体>
-
-内联函数会要求调用者具有与内联函数一样的上下文  
-比如内联函数标注返回 `void` 那么调用者也必须返回 `void`  
-不写的话就代表任何情况都可以，并且没有相关影响的代码    
-作为类型时 `async标注` 也写在 `inline` 的括号内  
-
-```cc
-inline void some() { 
-    return
-}
-
-void foo() {
-    some();
-}
-```
-
-展开成  
-
-```cc
-void foo() {
-    return
-}
-```
-
-使用 `inline return` 返回一个值  
-```cc
-int inline some() { 
-    val x = 1;
-    inline return x * 2;
-} 
-void foo() {
-  val x = some();
-}
-```
-
-展开成  
-
-```cc
-void foo() {
-  val x_1 = 1;
-  val x = x_1 * 2;
-}
-```
-
-但并不是所有 `inline` 函数都会被展开  
-比如作为变量传递的 `inline` 
-
-```cc
-Arr[`b] map(`b inline(loopbody) <-(`a) cb, Arr[`a] f) {
-    for(x in f) {
-        cb(x);
-    }
-}
-map({
-    break
-}, [])
-```
-
-## 异步
-使用 `await` 关键字或  
-在一个异步值后面加上 `!` 来 `await`  
-
-```csharp
-Async[int] some() async {
-    await some();
-    some()!;
-    return 1;
-}
-```
-
-`!` 实际上是后缀运算符
-
-```csharp
-`T  inline operator [`T]Async.self! async {
-    inline return await self;
-}
-```
-
-## 结构
-```csharp
-struct Vector3 {
-    int x;
-    int y;
-    int z;
-}
-val v = Vector3@{
-    x = 1;
-    y = 2;
-    z = 3;
-}
-```
-- #### 构造函数 
-    构造函数使用首字母大写的 `Self` 标注  
-    
-    ```cc
-    struct Vector3 {
-        int x, y, z;
-        Self(x, y, z) {
-            self.x = x;
-            self.y = y;
-            self.z = z;
-        }
-    }
-    val v = Vector3(1, 2, 3);
-    ```
-    - ##### 构造函数语法糖
-    ```csharp
-    struct Vector3(x, y, z) {
-        int x = x;
-        int y = y;
-        int z = z;
-    }
-    ```
-    - ##### 构造函数内成员定义
-    ```csharp
-    struct Vector3(self int x, self int y, self int z) {}
-    struct Vector3 <-(int x, int y, int z) {}
-    struct Vector3 {
-        Self(self int x, self int y, self int z);
-    }
-    struct Vector3 {
-        Self <-(int x, int y, int z);
-    }
-    ```
-- #### 成员函数
-    在结构内定义的成员和在外面定义的成员是等价的  
-    `.` 在函数调用上实际是管道运算符  
-    区别在于结构内定义可以省略一个自身参数  
-    并且 c3 使用 `self` 引用 和 `Self` 类型 而不使用 `this`
-    
-    ```cc
-    struct Some {
-        int a;
-        int add(int v) {
-            a + v
-        }
-    }
-    int add(Some { a }, int v) { // no self
-        a + v
-    }
-    int Some.add(int v) { // has self
-        a + v
-    }
-    
-    val s = Some@{ a = 1 };
-    s.add(2);
-    // 3
-    ```
-    - ##### 构造函数一样可以在外部  
-    并且构造函数也可以返回其他值  
-    结构内返回其他类型的构造函数不能进行构造  
-    也没有 `self` 引用  
-    
-    ```csharp
-    struct Some {
-        int a;
-        float Self() 2.0;
-    }
-    Some Some() = @{ a = 1 }; // no self
-    Some Some.Self() { a = 1 }; // has self
-    int Some() 1;
-    ```
-- #### 分部定义
-    对于结构的分部定义，只能在同个包并且同个模块内  
-
-    ```csharp
-    struct Some {
-        int a;
-    }
-    struct Some {
-        int b;
-    }
-    ```
-- #### 析构函数
-    ```cc
-    struct Some {
-        ~Self() { }
-    }
-    ```
-    
-#### 构造数据结构 
-的几种方式  
-
-```csharp
-val v = Vector3@{
-    x = 1;
-    y = 2;
-    z = 3;
-}
-val v = Vector3(1, 2, 3);
-Vector3 v = @{
-    x = 1;
-    y = 2;
-    z = 3;
-}
-
-Vector3 v = default;
-val v = default Vector3;
-```
-
-#### lambda形式构造  
-lambda形式时必须明确具有类型名  
-
-```scala
-val v = Vector3@|{
-    x = 1;
-    self.y = 2;
-    print(self);
-    self.z = 3;
-    // do anything
-}
-```
-
-## 子范围限定
-子范围只能选择超集内有的内容  
-但构造函数可以随意增加  
-
-```csharp
-struct Superset(int a, int b) {
-    int a = a;
-    int b = b;
-}
-struct A from Superset { a }
-struct B(int b) from Superset(0, b) { b }
-
-A a = Superset@{ a = 1; b = 2; };
-B b = B(1);
-
-B c = a; // error
-```
-
-## 枚举
-```csharp
-enum [`T]Maybe {
-    Self(`T val) Some(val);
-    of Some(`T val);
-    of None;
-    Maybe[`R] Some(`R <-(`T v) fn) case (self) {
-        of Some(v) { Some(fn(v)) }
-        of None = None;
-    };
-}
-Maybe[`R] Maybe[`T].FlatMap(Maybe[`R] <-(`T v) fn) case (self) {
-    of Some(v) { fn(v) }
-    of None = None;
-};
-
-Maybe some = Some(1);
-val some = Maybe.Some(1);
-val some = Maybe(1);
-
-Some(some, |{ 1 }).FlatMap(|{ None[int] }).Some(v -> |{ v + 1 });
-
-//////////////////////////////
-
-enum Some {
-    of A {
-        int a, b;
-    }
-}
-val x = Some.A@{ a = 1; b = 2 };
-```
 
 ## 性质
 性质是一性质不能扩展的  
@@ -780,11 +785,11 @@ val x = Some.A@{ a = 1; b = 2 };
 
 ```csharp
 kind SomeKind {
-    int add(int o);
+    add(int o) [int];
 }
 struct Some with SomeKind {
-    int v;
-    int add(int o) {
+    v int;
+    add(o int) [int] {
         v + o;
     }
 }
@@ -797,8 +802,8 @@ struct Some with SomeKind {
 
 ```csharp
 kind SomeKind {
-    int v;
-    int add(Self { v }, int o) {
+    v int;
+    add({ v } Self , o int) [int] {
         v + o
     }
 }
@@ -810,50 +815,50 @@ struct Some with SomeKind {}
 泛型括号 `[]` 在左边是定义，在右边是实例  
 
 ```csharp
-`T some(`T v) {
+fun some(v `T) [`T] {
     return v;
 }
 ```
 - #### 自动泛化
     ```csharp
-    val add(a, b) {
+    fun add(a, b) {
         return a + b;
     }
     ```
 - #### 泛型参数
     ```csharp
-    void [`T]some(`T v) {}
+    fun [`T]some(v ` v) {}
     ```
 - #### 泛型注解
     ```csharp
     #[`T]
-    void some(`T v) {}
+    fun some(v `T) {}
     ```
 - #### 泛型实际传递了类型值
     ```csharp
     #[`T]
-    Type a() {
+    fun a() [type] {
         return `T;
     }
     
     ```
 - #### 泛型约束
     ```csharp
-    `T some(`T v) where `T( Eq[`T] ) {
+    fun some(v `T) [`T] where(`T( Eq[`T] )) {
         return v
     }
     
-    `T [`T( Eq[`T] )]some(`T v) {
+    fun [`T( Eq[`T] )]some(v `T) [`T] {
         return v
     }
     
     #[`T( Eq[`T] )]
-    `T some(`T v) {
+    fun some(v `T) [`T] {
         return v
     }
     
-    #[`A, `B] where `A(num), `A( Eq[`B] ) 
-    bool some(`A a, `B b) {
+    #[`A, `B] where(`A(num), `A( Eq[`B] ))
+    fun some(a `A, b `B) [bool] {
         return Equals(a, b);
     }
     ```
@@ -862,43 +867,54 @@ struct Some with SomeKind {}
     泛型本身也可以携带泛型  
 
     ```csharp
-    `T <-[`T]() some() {
-        `T [`T]foo() = default
+    fun some() [[`T]()[`T]] {
+        fun [`T]foo()[`T] = default
         return foo
     }
 
-    void some(void [`T]foo(`T v)) {
+    fun some(foo [`T](`T v)[void]) {
         foo(1);
         foo('a');
     }
 
-    `T?! [`T]some;
+    mut [`T]some `T?;
+    mut [`T][`T?]some;
+    mut [`T?] some;
+
     some[int] = 1;
     some[bool] = true;
 
-    `T [`T]all_type_default = default;
+    [`T]all_type_default = default;
 
     `A[`B[`C]] some() {};
     ```
 
-## 返回值特化 
-可以重载不同类型的返回值  
-只能存在一个默认返回值类型  
-其他返回值类型必须包裹在 `:[]` 内  
-调用时在参数括号后附加 `:[]`   
-或者在明确类型的时候自动推导    
+## 泛型重叠
+泛型类型处于重叠时  
+具体取值是惰性的  
+只有所有泛型参数都被填充时才会开始实际计算  
 
 ```scala
-TypeDefault some(){}
-:[TypeA] some(){}
-:[TypeB] some(){}
+fun a(a int, b int)[int] {}
+fun a(a int)[(b int)[string]] {}
+fun a(a int, b string)[int] {}
+fun a(a int)[int] {}
 
-val d = some();
-val a = some():[TypeA];
-val b = some():[TypeB];
+val b = a 1;
+// [ int * (int)[int] * (string)[int] * (int)[string] ]b
 
-TypeA a = some();
-TypeB b = some();
+val [int]i = b;
+// i = b[int]
+// fun a(a int)[int]
+
+val c = b 1;
+// [int * string]c = b[(int)[auto]] 1
+// fun a(a int, b int)[int]
+// fun a(a int)[(b int)[string]]
+
+val d = b 'a';
+// [int]d = b[(string)[int]] 'a'
+// fun a(a int, b string)[int]
 ```
 
 ## 类
@@ -914,10 +930,10 @@ TypeB b = some();
 
 ```csharp
 class [`A, `B]Eq {
-    bool Equals(`A a, `B b);
+    Equals(a `A, b `B) [bool];
 }
 inpsace Eq[int, int] {
-    bool Equals(int a, int b) {
+    Equals(a int, b int) [bool] {
         return a == b;
     }
 }
@@ -928,10 +944,10 @@ Equals(1, 2);
 
 ```csharp
 class [`T]Eq {
-    bool Equals(`T a, `T b);
+    Equals(a `T, b `T) [bool];
 }
-[`A]inspace Eq[Arr[`A]] where `A( Eq[`A] ) {
-    bool Equals(Arr[`A] a, Arr[`A] b) {
+[`A]inspace Eq[Arr[`A]] where(`A( Eq[`A] )) {
+    Equals(a [`A], b Arr[`A]) [bool] {
         if(a.length != b.length) return false
         for(val i in a) {
           if(!Equals(a(i), b(i))) return false  
@@ -944,10 +960,10 @@ class [`T]Eq {
 
 ```csharp
 inspace Eq[int, int], Eq[float, float] {
-    bool Equals(int a, int b) {
+    Equals(a int, b int) [bool] {
         return a == b
     }
-    bool Equals(float a, float b) {
+    Equals(a float, b float) [bool] {
         return a == b
     }
 }
@@ -958,7 +974,7 @@ inspace Eq[int, int], Eq[float, float] {
 
 ```csharp
 class [`T]Some( Eq[`T] ) { 
-    void some(`T t);
+    some(t `T);
 }
 ```
 
@@ -972,38 +988,38 @@ class [`T]Some( Eq[`T] ) {
 
 ```csharp
 class [`T]Some {
-    void some(`T v);
+    some(v `T);
 }
 inspace Some[int] {
-    void some(int v) {};
+    some(v int) {};
 }
-void some(int v) {} // 优先使用
+fun some(v int) {} // 优先使用
 
 some(1);            // 使用独立定义
 some::Some[int](1); // 使用 inspace
 
-using Some[int], Other[xxx] {   // 使用 using 块
+using(Some[int], Other[xxx]) {   // 使用 using 块
     some(1);
 }
 
-void foo() using Some[int] {    // 函数级 using 块
+fun foo() using(Some[int]) {    // 函数级 using 块
     some(1);
 }
 
-void [Some[`T]]bar(`T v) {      // 泛型模式匹配
+fun [Some[`T]]bar(v `T) {      // 泛型模式匹配
     some(v);
 }
 ```
 #### 多个类共用一个实现
 ```csharp
 class A[`T] {
-    void some(`T v);
+    some(v `T);
 }
 class B[`T] {
-    void some(`T v);
+    some(v `T);
 }
 inspace A[int], B[int] {
-    void some(int v) {}
+    some(v int) {}
 }
 // some(1) == some::A[int](1) == some::B[int](1)
 ```
@@ -1036,7 +1052,7 @@ stackalloc val v = 'a'; //栈
 ```c++
 module path.to.Name; // 文件头
 
-export int a = 1; // 
+export val a = 1; // 
 
 module path.to.Name { // 局部模块
     export module sub.Name {
@@ -1051,14 +1067,14 @@ using path.to.Name import a, b; // 导入部分内容
 
 using path.to.Name as NewName import a as b, c; // 创建别名
 
-using path.to.Name { // 局部引用
-    using path.to.Name import a, b  { 
+using(path.to.Name) { // 局部引用
+    using(path.to.Name) import a, b  { 
     
     }
 }
 ```
 ```csharp
-void some() using path.to.Name {
+fun some() using(path.to.Name) {
     // 函数级局部引用
 }
 
@@ -1119,6 +1135,11 @@ module x() {
 type A(B);
 ```
 # 类型运算
+- 叠加态
+  
+    ```typescript
+    type s(a * b); // 同时是a也是b
+    ```
 - or
   
     ```typescript
@@ -1151,7 +1172,7 @@ type A(B);
 - not
   
     ```typescript
-    type s(!a); // 非运算，要求除了a以为的所有情况
+    type s(!a); // 非运算，要求除了a以外的所有情况
     ```
     ![not](https://upload.wikimedia.org/wikipedia/commons/7/73/Venn10.svg)
 ### 类型运算级联
@@ -1168,7 +1189,7 @@ type x(num)(float - int);
 *也可以用 ``` `() ``` 来表示一个匿名前置依赖*  
 
 ```csharp
-`n [`n(num)]add(`n a, `n b) {
+fun [`n(num)]add(`n a, `n b) [`n] {
     return a + b;
 }
 add[int](1, 2);
@@ -1179,7 +1200,7 @@ add[1](1, 1);
 对于数字字面量类型可以进行范围运算  
 
 ```typescript
-type x(Int)(> 0);
+type x(int)(> 0);
 type x(> 0); // 与上面等价，自动推导出 Int
 type x(> 0.0); // 推导出 Float
 
@@ -1193,9 +1214,9 @@ type x(0..<5); // 不包括 5
 ```
 #### 限定明确的数字类型
 ```typescript
-type x(0i);
+type x(0i); 
 type x(0i32);
-type x(0i64);
+type x(0i64); // 只能是 i16 类型的 0
 
 type x(0f);
 type x(0f32);
@@ -1210,9 +1231,9 @@ type x(0f64);
 - 中缀运算符
 
   ```csharp
-  string operator (string a) + (string b) { }
-  string operator string.self + (string b) { }
-  string operator (string a) + string.self { }
+  fun operator (a string) + (b string) [string] { }
+  fun operator string.self + (b string) [string] { }
+  fun operator (a string) + string.self [string] { }
 
   val x = 'a' + 'b';
   ```
@@ -1220,7 +1241,7 @@ type x(0f64);
 - 前缀运算符  
 
   ```csharp
-  int operator -(int some) { 0 - some }
+  fun operator -(some int) [int] { 0 - some }
 
   val x = -1;
   ```
@@ -1229,48 +1250,19 @@ type x(0f64);
   重载时，后缀运算符的参数不能和中缀运算符的第一个参数重复  
 
   ```csharp
-  Type inline operator (Type a)! { 
-    inline return Mutable[a] 
-  }
-  Type inline operator (Type a)? { 
+  inline[Type] operator (a Type)? { 
     inline return Nullable[a] 
   }
   ```
-
-## 第一类运算
-第一类运算必然是前缀的  
-从左向右的  
-
-第一类运算很像调用运算符重载  
-但是第一类运算必须有且只有一个参数  
-
-```csharp
-val a = (1 +);
-val b = a b;
-
-struct Some {
-    int operator self(int other) {
-        return other + 1
-    }
-}
-
-val x = Some();
-val y = x 1;
-// 2
-
-int operator string.self(int other) { '${self}${other}' }
-val a = 'a' 1;
-// 'a1'
-```
 
 ## 调用运算符重载
 
 ```csharp
 struct Some {
-    int self(int other) {
+    self(other int) [int] {
         return other + 1
     }
-    void self(int index) operator =(int value) {
+    self(index int) operator =(value int) {
         print(index, value)
     }
 }
@@ -1279,9 +1271,9 @@ some(1);
 // 2
 
 some(1) = 2
-// 1 2
+// print: 1 2
 
-int string.self(int other) { '${self}${other}' }
+fun string.self(other int) [int] { '${self}${other}' }
 val a = 'a'(1);
 // 'a1'
 ```
@@ -1373,28 +1365,28 @@ val a = 'a'(1);
 #### fib
 ```haskell
 type nat(>= 0);
-nat fib(0) 0;
-nat fib(1) 1;
-nat fib(n) fib(n - 1) + fib(n - 2);
+fun fib(0) [nat] 0;
+fun fib(1) [nat] 1;
+fun fib(n) [nat] fib(n - 1) + fib(n - 2);
 ```
 #### vector
 ```csharp
 struct [`n(1..), `T(Num)]Vec case {
     of [1] {
-        `T x;
+        x `T;
     }
     of [2] {
-        `T x, y;
+        x `T, `T y;
     }
     of [3] {
-        `T x, y, z;
+        x `T, y `T, z `T;
     }
     of [4] {
-        `T x, y, z, w;
+        x `T, y `T, z `T, w `T;
     }
     else {
-        `T x, y, z, w;
-        `T v#(5..`n)
+        x `T, y `T, z `T, w `T;
+        v#(5..`n)
     }
 }
 
@@ -1416,8 +1408,8 @@ Vec[5] v = @{
 ```csharp
 struct [`T, `l(> 0):len]Array {
     type Index(`l - 1);
-    `(0..`l) length { get; }
-    `T self(`(0..Index) index) { get; set; }
+    get length() [`(0..`l)] { }
+    get set self(index `(0..Index)) [`T];
 }
 
 val a = Array[string, 3]@{ 'a', 'b', 'c' };
@@ -1437,6 +1429,6 @@ val a == Array[:len = 3]@{ 1, 'b', false };
 #### functor
 ```cc
 class [`f]Functor {
-    `f[`b] fmap(`f[`a], `b <-(`a));
+    fmap(`f[`a], (`a)[`b]) [`f[`b]];
 }
 ```
