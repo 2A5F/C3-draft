@@ -29,11 +29,10 @@ print('hello world');
 - #### 变量定义
     ```cc
     mut a:[int?];
-    val a:[int] = 1;
-    mut a int;
+    val a:[int] = 1; // 有赋值语句时建议使用这种
+    mut a int?;
+    val a int = 1;
     ```
-
-    变量定义时类型写在名字后面而不是括号里的话是不能赋值的  
 
     - ##### 变量定义自动推断类型
          ```csharp
@@ -44,7 +43,7 @@ print('hello world');
         不可变变量必须马上赋值  
         
         ```csharp
-        val a:[int] = 1;
+        val a int = 1;
         val a = 1;
         ```
         - ###### 使用`lazy`块延迟初始化不可变变量  
