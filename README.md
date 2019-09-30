@@ -559,6 +559,58 @@ enum Some {
 }
 val x = Some.A@{ a = 1; b = 2 };
 ```
+
+## 元组
+元组同时也是优先级表示方式  
+1个元素的元组会自动解构  
+并且1个元素的具名元组可以自动构造  
+
+使用 `@()` 来表示元组字面量  
+
+```cc
+val x = @(1, 2);
+```
+
+### 元组结构
+```csharp
+record some @(int, bool);
+
+val x:[some] = @(1, true);
+
+record foo @(int);
+
+val x:[foo] = 1;
+
+val y:[int] = foo@(1);
+```
+
+## 数组
+使用 `@[]` 来表示数组字面量  
+
+```cc
+val x = @[1, 2, 3];
+```
+
+### 数组构造器
+
+在构造函数使用`@[]`来表示数组构造器构造函数  
+
+```cc
+record some {
+    fun Self@[args] {}
+}
+```
+
+## 解构模式
+
+在定义时使用相应的构造字面量来进行解构  
+
+```cc
+val @(x, y) = @(1, 2);
+val @[a, ..tail] = @[1, 2, 3, 4, 5];
+val @{some, foo as bar} = @{ some = 1; foo = 2 };
+```
+
 ## 控制流
 ```csharp
 val x = if (true) { 1 } 
@@ -594,7 +646,7 @@ while(false) {
 while { } // inf loop
 
 val iter = for(x in 0..10) ^ { yield x };
-val arr:[Arr[Arr]] = @[]
+val arr:[Arr[Arr]] = @[];
 val iter = for(x in arr) ^ { yield^ x };
 val iter = while(false) ^ { yield 1 };
 
@@ -1323,7 +1375,7 @@ val some = Some();
 some(1);
 // 2
 
-some(1) = 2
+let some(1) = 2;
 // print: 1 2
 
 fun string.self(other int):[int] { '${self}${other}' }
@@ -1458,28 +1510,6 @@ Vec[5] v = @{
     w = 4;
     v5 = 5;
 }
-```
-#### array
-```csharp
-record [`T, `l(> 0):len]Array {
-    type Index(`l - 1);
-    fun get length():[`(0..`l)] { }
-    fun get set self(index `(0..Index)):[`T];
-}
-
-val a = Array[string, 3]@{ 'a', 'b', 'c' };
-a(0) // 'a'
-a(5) // type error
-
-val a = Array[string]@{ 'a', 'b', 'c' };
-a(5); // runtime error
-
-int len = 3;
-val a = Array[string, len]@{ 'a', 'b', 'c' };
-a(5); // runtime error
-
-// Array[any, 3];
-val a == Array[:len = 3]@{ 1, 'b', false };
 ```
 #### functor
 ```cc
