@@ -1,7 +1,7 @@
 # 变量定义
 
 ```rust
-def a = 1
+def a = 1;
 ```
 
 ## 可变变量
@@ -9,8 +9,8 @@ def a = 1
 `mut int` 是类型
 
 ```cc
-def a mut int
-let a = 1
+def a mut int;
+let a = 1;
 ```
 
 ### 变量修改语句
@@ -26,20 +26,20 @@ let a + 1; // 其他语言是 a += 1
 ## 类型标注
 
 ```cs
-def a int = 1
-def b mut int
-let b = int
+def a int = 1;
+def b mut int;
+let b = int;
 ```
 
 ### 类型注解
 
 ```cs
-#type int
-def a = 1
+#type int;
+def a = 1;
 
-#type mut int
-def b
-let b = 1
+#type mut int;
+def b;
+let b = 1;
 ```
 
 ## 延迟初始化不可变变量
@@ -47,7 +47,7 @@ let b = 1
 ```cs
 def a by lazy {
     1
-}
+};
 ```
 
 ## 常量
@@ -55,7 +55,7 @@ def a by lazy {
 一般不需要使用，不可变值会自动优化成常量  
 
 ```cs
-def a = const 1
+def a = const 1;
 ```
 
 # 注释

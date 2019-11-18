@@ -3,35 +3,36 @@
 函数最后可省略 `return`  
 没有 `{}` 的函数可以省略返回类型  
 不写类型的话会自动推断  
+函数里最后的一句话可以省略 `;`
 
 ```cs
 def add fun(a int, b int) int = {
     return a + b
-}
+};
 def add fun(a, b) int = {
     a + b
-}
-def add fun(a, b) = a + b
+};
+def add fun(a, b) = a + b;
 ```
 
 ## 类型注解
 ```cs
-#type fun(int, int) int
+#type fun(int, int) int;
 def add fun(a, b) = {
     a + b
-}
+};
 
-#type fun(a int, b int) int
+#type fun(a int, b int) int;
 def add = {
     a + b
-}
+};
 ```
 
 ### 函数变量
 
 ```cc
-def add mut fun(a int, b int) int
-let add = { a + b }
+def add mut fun(a int, b int) int;
+let add = { a + b };
 ```
 
 ### 返回类型自动推断
@@ -40,7 +41,7 @@ let add = { a + b }
 ```cc
 def add fun(a int, b int) auto = {
     a + b
-}
+};
 ```
 
 ### 可变返回值
@@ -48,8 +49,8 @@ def add fun(a int, b int) auto = {
 但是可以在定义变量时省略具体类型  
 
 ```scala
-def some fun() int = 1
-def a mut = some()
+def some fun() int = 1;
+def a mut = some();
 ```
 
 ## lambda
@@ -91,17 +92,17 @@ def some fun() {
 
 ## 函数类型
 ```csharp
-def add (a int, b int) -> int = { a + b }
-def add a int -> b int -> int = { a + b }
+def add (a int, b int) -> int = { a + b };
+def add a int -> b int -> int = { a + b };
     
 def some fun(add fun(a int, b int) int) = {
-    add(1, 2)
+    add(1, 2);
 }
 def some fun(add (a int, b int) -> int) = {
-    add(1, 2)
+    add(1, 2);
 }
 def some fun(add a int -> b int -> int) = {
-    add(1, 2)
+    add(1, 2);
 }
 ```
 
@@ -133,7 +134,7 @@ some(?=>?, ?, ?, 1, 2) {
 ```cc
 def some fun() {
     return '${?} - ${1}';
-}
+};
 some();
 // [A](a A) -> string
 ```

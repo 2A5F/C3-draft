@@ -11,11 +11,11 @@
 ```scala
 def some inline(return) fun() = { 
     return
-}
+};
 
 def foo fun() {
     some();
-}
+};
 ```
 
 展开成  
@@ -23,26 +23,26 @@ def foo fun() {
 ```scala
 def foo fun() {
     return
-}
+};
 ```
 
 使用 `inline return` 返回一个值  
 ```scala
 def some inline int fun() = { 
-    def x = 1
+    def x = 1;
     inline return x * 2
-} 
+};
 def foo fun() = {
   def x = some()
-}
+};
 ```
 
 展开成  
 
 ```scala
 def foo fun() {
-  def x_1 = 1
-  def x = x_1 * 2
+  def x_1 = 1;
+  def x = x_1 * 2;
 }
 ```
 
@@ -56,6 +56,6 @@ def [A, B] map fun(cb A -> B inline(loopbody), f Arr[A]) Arr[B] = {
     }
 }
 map({
-    break
+    break;
 }, [])
 ```

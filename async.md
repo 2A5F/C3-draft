@@ -4,10 +4,10 @@
 
 ```scala
 def some fun() Async[int] = async {
-    await some()
-    some()!
+    await some();
+    some()!;
     return 1
-}
+};
 ```
 
 `!` 实际上是后缀运算符
@@ -15,5 +15,5 @@ def some fun() Async[int] = async {
 ```scala
 def [T] operator(Async.self!) inline fun() T = async {
     inline return await self
-}
+};
 ```
